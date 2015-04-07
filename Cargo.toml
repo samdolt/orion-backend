@@ -1,0 +1,18 @@
+[project]
+name = "orion-backend"
+version = "0.0.1"
+authors = ["Samuel Dolt <samuel@dolt.ch>"]
+
+[[bin]]
+name = "orion-logger"
+path = "src/logger/main.rs"
+
+[dependencies]
+dbus = "0.0.8"
+docopt = "*"
+rustc-serialize = "*"
+env_logger = "*"
+log = "*"
+chrono = "*"
+regex = "*"
+regex_macros = "*"
