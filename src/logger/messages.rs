@@ -37,7 +37,7 @@ More info at `https://www.ietf.org/rfc/rfc3339.txt`
 ";
 
 pub static INVALID_VALUE: &'static str = "
-Invalide value - Value should represent one or more measurements
+Invalid value - Value should represent one or more measurements
 
 Example:
 
