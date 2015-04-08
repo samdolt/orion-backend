@@ -10,6 +10,7 @@ path = "src/logger/main.rs"
 [dependencies]
 dbus = "0.0.8"
 docopt = "*"
+docopt_macros = "*"
 rustc-serialize = "*"
 env_logger = "*"
 log = "*"

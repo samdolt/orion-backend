@@ -5,6 +5,7 @@ dependencies = [
  "chrono 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "dbus 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "docopt 0.6.59 (registry+https://github.com/rust-lang/crates.io-index)",
+ "docopt_macros 0.6.59 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -35,6 +36,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "regex 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "docopt_macros"
+version = "0.6.59"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "docopt 0.6.59 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

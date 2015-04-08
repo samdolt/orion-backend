@@ -18,6 +18,8 @@
 #![feature(convert)]
 #![feature(file_path)]
 #![feature(plugin)]
+
+#![plugin(docopt_macros)]
 #![plugin(regex_macros)]
 
 extern crate docopt;
@@ -55,7 +57,7 @@ use device::Device;
 
 static DATA_PATH: &'static str = "/tmp/data";
 
-static USAGE: &'static str = "
+docopt! (Args, "
 Orion Backend
 
 Usage:
@@ -78,37 +80,25 @@ Notes:
 
 Report bugs to: <samuel@dolt.ch>
 Orion home page: <http://orion.dolt.ch>
-";
-
-#[derive(RustcDecodable, Debug)]
-struct Args {
-    arg_device: String,
-    arg_value: String,
-    flag_timestamp: String,
-    flag_now: bool,
-    flag_verbose: bool,
-    flag_help: bool,
-    flag_version: bool,
-    flag_debug: bool,
-}
+");
 
 
 fn main() {
-    let args: Args = Docopt::new(USAGE)
-                            .and_then(|d| d.decode())
-                            .unwrap_or_else(|e| e.exit());
+    let args: Args = Args::docopt()
+                          .decode()
+                          .unwrap_or_else(|e| e.exit());
     if args.flag_version {
-        println!("orion_backend (Orion) {}", env!("CARGO_PKG_VERSION"));
+        println!("Orion-Logger (Orion-Backend) {}", env!("CARGO_PKG_VERSION"));
         println!("{}", COPYRIGHT);
         return;
 
     }
 
     init_logger_with_args(&args);
-    
+
     if args.flag_timestamp != "" {
         trace!("Testing args.flag_timestamp");
-        
+
         if args.flag_timestamp.is_RFC3339_timestamp() == false {
             println!("{}", INVALID_TIMESTAMP);
             return;
@@ -119,7 +109,7 @@ fn main() {
         println!("{}", INVALID_VALUE);
         return;
     }
-    
+
     let device = match Device::with_slug(args.arg_device.as_str()) {
         Some(x) => x,
         None  => { 
@@ -127,7 +117,7 @@ fn main() {
                     return
         },
     };
-    
+
     let data = MeasurementPoint { 
         date : if args.flag_now { 
                     UTC::now() 
@@ -139,14 +129,14 @@ fn main() {
         data: args.arg_value,
         device: device,
     };
-    
+
     add_value(data).unwrap();
 
 }
 
 fn init_logger_with_args( args: &Args ) {
     let key = "RUST_LOG";
-    
+
     if args.flag_verbose && args.flag_debug {
         std::env::set_var(key, "TRACE");
     } else if args.flag_verbose {
@@ -164,7 +154,7 @@ fn init_logger_with_args( args: &Args ) {
 struct Measurement {
     value: String,
     value_modifier: String,
-    
+
     unit: String,
     unit_modifier: String,
 }
@@ -176,7 +166,35 @@ struct MeasurementPoint {
     device: Device,
 }
 
-
+/// Return a `io::Result<File>` for the given `MeasurementPoint`
+///
+/// # Examples
+///
+/// ```
+/// let mp = MeasurementPoint {
+///     date : UTC::now(),
+///     data : "Some data",
+///     device : Device::with_slug("port@node.driver"),
+/// }
+///
+/// let file = open_file_for(&mp).unwrap();
+/// ```
+///
+/// This examples open this file:
+///
+///     $(DATA_PATH)/$(DRIVER)/$(NODE)/$(YEAR)/$(MONTH)/$DAY/$(PORT).dat
+///
+/// This function create every missing parent directory and open the file
+/// whith `create`, `write` and `append` flags
+///
+/// See [`OpenOptions` from `std::fs`](http://doc.rust-lang.org/std/fs/struct.OpenOptions.html)
+///
+/// # Failures
+///
+/// This function can fail if:
+///     - Invalid permission is set on folder $(DATA_PATH)
+///     - $(DATA_PATH) is read only
+///     - Other system error with file handling
 fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
     let path = Path::new(DATA_PATH)
                    .join(mp.device.get_driver())
@@ -184,15 +202,15 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
                    .join(format!("{}", mp.date.year()))
                    .join(format!("{}", mp.date.month()))
                    .join(format!("{}", mp.date.day()));
-    
+
     debug!("Create all parent directory of {:?}", path.as_path()); 
     try!(fs::create_dir_all(path.as_path()));
-    
+
     let filename = format!("{}.dat", mp.device.get_port());
     let file_path = path.join(filename);
-    
+
     debug!("Open or create file {:?}", file_path.as_path());
-    
+
     OpenOptions::new()
                 .create(true)
                 .write(true)
@@ -204,17 +222,17 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
 
 fn create_line_for(mp: &MeasurementPoint) -> String {
     let mut line = String::with_capacity(80);
-    
+
     debug!("Create_line_for {:?}", mp);
-    
+
     line.push_str(mp.date.to_rfc3339().as_str());
     line.push(' ');
-    
+
     line.push_str(mp.data.as_str());
     line.push('\n');
-    
+
     debug!("Line: {}", line);
-    
+
     line
 }
 
@@ -223,10 +241,8 @@ fn create_line_for(mp: &MeasurementPoint) -> String {
 fn add_value(mp: MeasurementPoint) -> io::Result<()> {
     let mut file = try!( open_file_for(&mp) );
     let line = create_line_for(&mp);
-    
+
     debug!("Append line '{}' to {:?}", line, file.path());
     try!(file.write_all(line.as_bytes()));
     Ok(())
-} 
-
-
+}
