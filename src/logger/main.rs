@@ -19,7 +19,6 @@
 #![feature(file_path)]
 #![feature(plugin)]
 
-#![plugin(docopt_macros)]
 #![plugin(regex_macros)]
 
 extern crate docopt;
@@ -61,7 +60,7 @@ mod measurement;
 
 static DATA_PATH: &'static str = "/tmp/data";
 
-docopt! (Args, "
+static USAGE: &'static str = "
 Orion Backend
 
 Usage:
@@ -84,13 +83,25 @@ Notes:
 
 Report bugs to: <samuel@dolt.ch>
 Orion home page: <http://orion.dolt.ch>
-");
+";
 
+#[derive(RustcDecodable, Debug)]
+struct Args {
+    arg_device: String,
+    arg_value: String,
+    flag_timestamp: String,
+    flag_now: bool,
+    flag_verbose: bool,
+    flag_help: bool,
+    flag_version: bool,
+    flag_debug: bool,
+}
 
 fn main() {
-    let args: Args = Args::docopt()
-                          .decode()
-                          .unwrap_or_else(|e| e.exit());
+    let args: Args = Docopt::new(USAGE)
+                            .and_then(|d| d.decode())
+                            .unwrap_or_else(|e| e.exit());
+
     if args.flag_version {
         println!("Orion-Logger (Orion-Backend) {}", env!("CARGO_PKG_VERSION"));
         println!("{}", COPYRIGHT);

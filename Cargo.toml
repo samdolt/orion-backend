@@ -12,9 +12,8 @@ name = "orion"
 path = "src/liborion/lib.rs"
 
 [dependencies]
-dbus = "0.0.8"
+dbus = "*"
 docopt = "*"
-docopt_macros = "*"
 rustc-serialize = "*"
 env_logger = "*"
 log = "*"
