@@ -130,3 +130,37 @@ fn test_device_with_slug() {
 
     assert!( dev2.is_none() );
 }
+
+#[test]
+fn test_device_get_slug() {
+    let dev1 = Device::with_slug("port@node.driver").unwrap();
+    assert_eq!(dev1.get_slug(), "port@node.driver");
+
+    let dev2 = Device::new(
+        "port".to_string(),
+        "node".to_string(),
+        "driver".to_string(),
+    ).unwrap();
+
+    assert_eq!(dev2.get_slug(), "port@node.driver");
+}
+
+#[test]
+fn test_device_get_port_node_and_driver() {
+    let dev1 = Device::with_slug("port@node.driver").unwrap();
+    assert_eq!(dev1.get_port(), "port");
+    assert_eq!(dev1.get_node(), "node");
+    assert_eq!(dev1.get_driver(), "driver");
+
+    let dev2 = Device::new(
+        "port".to_string(),
+        "node".to_string(),
+        "driver".to_string(),
+    ).unwrap();
+    assert_eq!(dev2.get_port(), "port");
+    assert_eq!(dev2.get_node(), "node");
+    assert_eq!(dev2.get_driver(), "driver");
+}
+
+
+
