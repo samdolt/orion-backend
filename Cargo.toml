@@ -7,6 +7,10 @@ authors = ["Samuel Dolt <samuel@dolt.ch>"]
 name = "orion-logger"
 path = "src/logger/main.rs"
 
+[lib]
+name = "orion"
+path = "src/liborion/lib.rs"
+
 [dependencies]
 dbus = "0.0.8"
 docopt = "*"

@@ -33,6 +33,8 @@ extern crate rustc_serialize;
 extern crate env_logger;
 extern crate chrono;
 
+extern crate orion;
+
 use docopt::Docopt;
 use std::fs;
 
@@ -54,6 +56,8 @@ use messages::*;
 
 mod device;
 use device::Device;
+
+mod measurement;
 
 static DATA_PATH: &'static str = "/tmp/data";
 
@@ -147,16 +151,6 @@ fn init_logger_with_args( args: &Args ) {
         std::env::set_var(key, "WARN");
     }
     env_logger::init().unwrap();
-}
-
-
-#[derive(Debug)]
-struct Measurement {
-    value: String,
-    value_modifier: String,
-
-    unit: String,
-    unit_modifier: String,
 }
 
 #[derive(Debug)]
