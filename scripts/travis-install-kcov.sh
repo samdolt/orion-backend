@@ -8,4 +8,4 @@ cd kcov-master/build &&
 cmake .. &&
 make &&
 sudo make install &&
-cd ../.. &&
+cd ../..
