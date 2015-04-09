@@ -17,7 +17,10 @@
 
 #![feature(plugin)]
 #![plugin(regex_macros)]
+#![feature(convert)]
 
 extern crate regex;
+#[macro_use] extern crate log;
+
 
 pub mod core;

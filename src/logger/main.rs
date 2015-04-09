@@ -53,10 +53,8 @@ use validator::OrionLoggerValidator;
 mod messages;
 use messages::*;
 
-mod device;
-use device::Device;
+use orion::core::Device;
 
-mod measurement;
 
 static DATA_PATH: &'static str = "/tmp/data";
 

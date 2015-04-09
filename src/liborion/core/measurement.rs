@@ -16,9 +16,11 @@
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
 
-use orion::core::Unit;
+use super::Unit;
 
-struct Measurement {
+pub struct Measurement {
     value: f64,
     unit:  Unit,
 }
+
+

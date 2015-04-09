@@ -16,6 +16,12 @@
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
 
+mod unit;
 pub use self::unit::Unit;
 pub use self::unit::ParseUnitError;
-mod unit;
+
+mod device;
+pub use self::device::Device;
+
+mod measurement;
+pub use self::measurement::Measurement;

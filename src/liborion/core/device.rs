@@ -15,6 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
+/// Internal representation of a device
+///
+/// # Example
+///
+/// ```
+/// use orion::core::Device;
+///
+/// let device = Device::with_slug("port@node.driver");
+/// ```
 #[derive(Debug)]
 pub struct Device {
     slug  : String,
@@ -25,13 +34,38 @@ pub struct Device {
 
 impl Device {
 
-    pub fn new(port: String, node: String, driver: String) -> Option< Device > {
+    /// Construct a new Device for given port, node and driver
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use orion::core::Device;
+    ///
+    /// let device = Device::new("port", "node", "driver").unwrap();
+    ///
+    /// ```
+    ///
+    /// # Failures
+    ///
+    /// `port`, `node` and `driver` string must only contains alphanumerics,
+    /// `-` or `_` characters.
+    ///
+    /// ```
+    /// use orion::core::Device;
+    ///
+    /// // Invalid device
+    /// assert!( Device::new("port$", "node", "driver").is_none() );
+    ///
+    /// // Valid device
+    /// let device = Device::new("port-10", "node_2", "drivers1").unwrap();
+    /// ```
+    pub fn new(port: &str, node: &str, driver: &str) -> Option< Device > {
 
         let device = Device {
             slug   : format!("{}@{}.{}", port, node, driver),
-            port   : port,
-            node   : node,
-            driver : driver,
+            port   : port.to_string(),
+            node   : node.to_string(),
+            driver : driver.to_string(),
         };
 
         match device.is_valid() {
@@ -40,6 +74,33 @@ impl Device {
         }
     }
 
+    /// Construct a new `Device` for a given slug
+    ///
+    /// A device slug has this form : `"port@node.driver"
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use orion::core::Device;
+    ///
+    /// let device = Device::with_slug("port@node.driver").unwrap();
+    /// ```
+    ///
+    /// # Failures
+    ///
+    /// -  A slug must respect this form : `port@node.driver`.
+    /// - `port`, `node` and `driver` must only contains alphanumerics,
+    ///   `-` or `_` characters.
+    ///
+    /// ```
+    /// use orion::core::Device;
+    ///
+    /// // Invalid slug
+    /// assert!( Device::with_slug("port.10@node$1.driver").is_none() );
+    ///
+    /// // Valid slug
+    /// let device = Device::with_slug("port-10@node_2.drivers1").unwrap();
+    /// ```
     pub fn with_slug(slug : &str) -> Option< Device > {
 
         let re = regex!(r"^([\w-]*)@([\w-]*).([\w-]*)$");
@@ -54,15 +115,15 @@ impl Device {
             slug   : slug.to_string(),
             port   : match data.at(1) {
                         Some(x) => x.to_string(),
-                        None    => return None,
+                        None    => unreachable!(),
                      },
             node   : match data.at(2) {
                         Some(x) => x.to_string(),
-                        None    => return None,
+                        None    => unreachable!(),
                      },
             driver : match data.at(3) {
                         Some(x) => x.to_string(),
-                        None    => return None,
+                        None    => unreachable!(),
                      },
         };
 
@@ -103,17 +164,17 @@ fn test_device_new() {
 
     // Valid new device with A-Z
     let dev1 = Device::new(
-        "PORT".to_string(),
-        "NODE".to_string(),
-        "DRIVER".to_string(),
+        "PORT",
+        "NODE",
+        "DRIVER",
     );
     assert!( dev1.is_some() );
 
     // Invalid new device
     let dev2 = Device::new(
-        "PORT-INV".to_string(),
-        "NODE@".to_string(),
-        "DRIVERS.".to_string(),
+        "PORT-INV",
+        "NODE@",
+        "DRIVERS.",
     );
     assert!( dev2.is_none() );
 }
@@ -122,7 +183,7 @@ fn test_device_new() {
 fn test_device_with_slug() {
     // Valid new device
     let dev1 = Device::with_slug("port@node.driver");
-    
+
     assert!( dev1.is_some() );
 
     // Invalid new device
@@ -137,9 +198,9 @@ fn test_device_get_slug() {
     assert_eq!(dev1.get_slug(), "port@node.driver");
 
     let dev2 = Device::new(
-        "port".to_string(),
-        "node".to_string(),
-        "driver".to_string(),
+        "port",
+        "node",
+        "driver",
     ).unwrap();
 
     assert_eq!(dev2.get_slug(), "port@node.driver");
@@ -153,9 +214,9 @@ fn test_device_get_port_node_and_driver() {
     assert_eq!(dev1.get_driver(), "driver");
 
     let dev2 = Device::new(
-        "port".to_string(),
-        "node".to_string(),
-        "driver".to_string(),
+        "port",
+        "node",
+        "driver",
     ).unwrap();
     assert_eq!(dev2.get_port(), "port");
     assert_eq!(dev2.get_node(), "node");

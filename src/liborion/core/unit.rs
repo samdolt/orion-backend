@@ -19,8 +19,6 @@ use std::str::FromStr;
 use std::error::Error;
 use std::fmt;
 
-use regex;
-
 /// Internal representation of unit (SI)
 ///
 /// # Example
@@ -40,6 +38,8 @@ pub enum Unit {
     Second,
     Kilogram,
 }
+
+
 #[derive(Debug)]
 pub enum ParseUnitError {
     Invalid,
@@ -50,6 +50,7 @@ impl fmt::Display for ParseUnitError {
         self.description().fmt(f)
     }
 }
+
 impl Error for ParseUnitError {
     fn description(&self) -> &str {
         match *self {
@@ -75,24 +76,23 @@ impl FromStr for Unit {
     /// use orion::core::{Unit,ParseUnitError};
     /// use std::str::FromStr;
     ///
-    /// let v = Unit::from_str("[V]").unwrap();
+    /// let v = Unit::from_str("V").unwrap();
     /// ```
     /// # Failure
     ///
     /// This function fail with `Err(ParseUnitError::Invalid)` if :
     ///
-    /// - String don't use `"[unit]"` format
     /// - Unit is not one of `V`, `A`, `Ω`, `W`, `K`, `s` or `kg`
     ///
     /// ```
     /// use orion::core::{Unit,ParseUnitError};
     /// use std::str::FromStr;
     /// assert!(
-    ///     Unit::from_str("[wrong_unit]").is_err()
+    ///     Unit::from_str("wrong_unit").is_err()
     /// );
     fn from_str(s: &str) -> Result<Unit, ParseUnitError>{
 
-        let re = regex!(r"[\[](V|A|Ω|W|K|s|kg)[\]]$");
+        let re = regex!(r"(V|A|Ω|W|K|s|kg)$");
 
         let data = match re.captures(s) {
             Some(x) => x,
@@ -101,7 +101,7 @@ impl FromStr for Unit {
 
         let extracted_content = match data.at(1) {
             Some(x) => x,
-            None    => return Err(ParseUnitError::Invalid),
+            None    => unreachable!(),
         };
 
         match extracted_content {
@@ -119,3 +119,58 @@ impl FromStr for Unit {
 
 }
 
+impl fmt::Display for Unit {
+
+
+    /// Format `Unit` to `str`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use orion::core::Unit;
+    /// use std::fmt::Display;
+    ///
+    /// let unit = Unit::Volt;
+    /// println!("3 {}", unit);
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            Unit::Volt     => write!(f, "{}", "V"),
+            Unit::Ohm      => write!(f, "{}", "Ω"),
+            Unit::Ampere   => write!(f, "{}", "A"),
+            Unit::Watt     => write!(f, "{}", "W"),
+            Unit::Kelvin   => write!(f, "{}", "K"),
+            Unit::Second   => write!(f, "{}", "s"),
+            Unit::Kilogram => write!(f, "{}", "kg"),
+        }
+    }
+}
+
+#[test]
+fn test_unit_from_str() {
+
+    assert!( Unit::from_str("V").is_ok() );
+    assert!( Unit::from_str("Ω").is_ok() );
+    assert!( Unit::from_str("A").is_ok() );
+    assert!( Unit::from_str("W").is_ok() );
+    assert!( Unit::from_str("K").is_ok() );
+    assert!( Unit::from_str("s").is_ok() );
+    assert!( Unit::from_str("kg").is_ok() );
+
+    assert!( Unit::from_str("[V]").is_err() );
+    assert!( Unit::from_str("super_unit").is_err() );
+
+}
+
+#[test]
+fn test_unit_to_string() {
+    // to_string use fmt method
+
+    assert_eq!( Unit::Volt.to_string()     , "V" );
+    assert_eq!( Unit::Ohm.to_string()      , "Ω" );
+    assert_eq!( Unit::Ampere.to_string()   , "A" );
+    assert_eq!( Unit::Watt.to_string()     , "W" );
+    assert_eq!( Unit::Kelvin.to_string()   , "K" );
+    assert_eq!( Unit::Second.to_string()   , "s" );
+    assert_eq!( Unit::Kilogram.to_string() , "kg" );
+}
