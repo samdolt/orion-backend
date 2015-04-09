@@ -25,3 +25,4 @@ pub use self::device::Device;
 
 mod measurement;
 pub use self::measurement::Measurement;
+pub use self::measurement::ParseMeasurementError;

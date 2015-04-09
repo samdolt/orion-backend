@@ -92,7 +92,7 @@ impl FromStr for Unit {
     /// );
     fn from_str(s: &str) -> Result<Unit, ParseUnitError>{
 
-        let re = regex!(r"(V|A|Ω|W|K|s|kg)$");
+        let re = regex!(r"^(V|A|Ω|W|K|s|kg)$");
 
         let data = match re.captures(s) {
             Some(x) => x,
@@ -159,6 +159,7 @@ fn test_unit_from_str() {
 
     assert!( Unit::from_str("[V]").is_err() );
     assert!( Unit::from_str("super_unit").is_err() );
+    assert!( Unit::from_str("cars").is_err() );
 
 }
 
@@ -174,3 +175,4 @@ fn test_unit_to_string() {
     assert_eq!( Unit::Second.to_string()   , "s" );
     assert_eq!( Unit::Kilogram.to_string() , "kg" );
 }
+
