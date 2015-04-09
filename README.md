@@ -2,6 +2,7 @@
 Backend for Orion
 
 [![Build Status](https://travis-ci.org/samdolt/orion-backend.svg?branch=master)](https://travis-ci.org/samdolt/orion-backend)
+[![Coverage Status](https://coveralls.io/repos/samdolt/orion-backend/badge.svg)](https://coveralls.io/r/samdolt/orion-backend)
 [![Stories in Ready](https://badge.waffle.io/samdolt/orion-backend.svg?label=ready&title=Ready)](http://waffle.io/samdolt/orion-backend) 
 
 ```bash
