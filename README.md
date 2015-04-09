@@ -2,6 +2,7 @@
 Backend for Orion
 
 [![Build Status](https://travis-ci.org/samdolt/orion-backend.svg?branch=master)](https://travis-ci.org/samdolt/orion-backend)
+[![Stories in Ready](https://badge.waffle.io/samdolt/orion-backend.svg?label=ready&title=Ready)](http://waffle.io/samdolt/orion-backend) 
 
 ```bash
 cargo test --no-run
