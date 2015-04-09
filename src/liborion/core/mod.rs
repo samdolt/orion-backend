@@ -26,3 +26,7 @@ pub use self::device::Device;
 mod measurement;
 pub use self::measurement::Measurement;
 pub use self::measurement::ParseMeasurementError;
+
+mod measurements_list;
+pub use self::measurements_list::MeasurementsList;
+pub use self::measurements_list::ParseMeasurementsListError;

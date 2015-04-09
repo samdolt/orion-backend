@@ -98,6 +98,7 @@ impl FromStr for Measurement {
     /// assert!(
     ///     Measurement::from_str("4x4[Car]").is_err()
     /// );
+    /// ```
     fn from_str(s: &str) -> Result<Measurement, ParseMeasurementError>{
 
         let re = regex!(r"^([^\[\]]*)\[([^\[\]]*)\]$");
@@ -201,7 +202,7 @@ impl From<ParseFloatError> for ParseMeasurementError {
 
 
 #[test]
-fn measurement_from_str() {
+fn test_measurement_from_str() {
     assert!( Measurement::from_str("3[V]").is_ok() );
     assert!( Measurement::from_str("4.67[kg]").is_ok() );
     assert!( Measurement::from_str("-117[A]").is_ok() );
@@ -228,7 +229,7 @@ fn measurement_from_str() {
 }
 
 #[test]
-fn measurement_to_string() {
+fn test_measurement_to_string() {
     // to_string use fmt method
     assert_eq!( "3[V]", Measurement::new(3.0, Unit::Volt).to_string() );
     assert_eq!("1.1234[A]", Measurement::new(1.1234, Unit::Ampere).to_string() );
