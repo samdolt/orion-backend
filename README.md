@@ -12,3 +12,8 @@ xdg-open target/cov/html
 ```
 
 See http://users.rust-lang.org/t/tutorial-how-to-collect-test-coverages-for-rust-project/650/2
+
+Idea for distribued protocol
+http://thesecretlivesofdata.com/raft/
+http://hoverbear.org/2015/04/09/raft-the-next-generation-3/
+https://github.com/hoverbear/raft
