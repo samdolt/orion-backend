@@ -43,6 +43,7 @@ use std::path::Path;
 use std::io;
 use std::io::Write;
 use std::fs::OpenOptions;
+use std::str::FromStr;
 
 use chrono::{UTC,DateTime,Datelike};
 
@@ -53,8 +54,7 @@ use validator::OrionLoggerValidator;
 mod messages;
 use messages::*;
 
-use orion::core::Device;
-
+use orion::core::*;
 
 static DATA_PATH: &'static str = "/tmp/data";
 
@@ -118,10 +118,12 @@ fn main() {
         }
     }
 
-    if args.arg_value.is_measurements_list() == false {
-        println!("{}", INVALID_VALUE);
-        return;
-    }
+    let meas_list = match MeasurementsList::from_str(args.arg_value.as_str() ) {
+        Ok(x)   => x,
+        Err(_)  => { print!("{}", INVALID_VALUE);
+                    return
+                   }
+    };
 
     let device = match Device::with_slug(args.arg_device.as_str()) {
         Some(x) => x,
@@ -139,7 +141,7 @@ fn main() {
                         args.flag_timestamp.as_str()
                     ).unwrap().with_timezone(&UTC)
               }, 
-        data: args.arg_value,
+        data: meas_list,
         device: device,
     };
 
@@ -165,7 +167,7 @@ fn init_logger_with_args( args: &Args ) {
 #[derive(Debug)]
 struct MeasurementPoint {
     date: DateTime<UTC>,
-    data: String,
+    data: MeasurementsList,
     device: Device,
 }
 
@@ -202,6 +204,7 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
     let path = Path::new(DATA_PATH)
                    .join(mp.device.get_driver())
                    .join(mp.device.get_node())
+                   .join(mp.device.get_port())
                    .join(format!("{}", mp.date.year()))
                    .join(format!("{}", mp.date.month()))
                    .join(format!("{}", mp.date.day()));
@@ -209,7 +212,7 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
     debug!("Create all parent directory of {:?}", path.as_path()); 
     try!(fs::create_dir_all(path.as_path()));
 
-    let filename = format!("{}.dat", mp.device.get_port());
+    let filename = "data.txt";
     let file_path = path.join(filename);
 
     debug!("Open or create file {:?}", file_path.as_path());
@@ -231,7 +234,7 @@ fn create_line_for(mp: &MeasurementPoint) -> String {
     line.push_str(mp.date.to_rfc3339().as_str());
     line.push(' ');
 
-    line.push_str(mp.data.as_str());
+    line.push_str(mp.data.to_string().as_str());
     line.push('\n');
 
     debug!("Line: {}", line);
