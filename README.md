@@ -17,3 +17,6 @@ Idea for distribued protocol
 http://thesecretlivesofdata.com/raft/
 http://hoverbear.org/2015/04/09/raft-the-next-generation-3/
 https://github.com/hoverbear/raft
+
+
+http://meritbadge.herokuapp.com/
