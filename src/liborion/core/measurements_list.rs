@@ -24,6 +24,12 @@ use std::str::FromStr;
 
 use super::ParseMeasurementError;
 
+use regex;
+
+macro_rules! regex(
+    ($s:expr) => (regex::Regex::new($s).unwrap());
+);
+
 /// Internal representation of measurement list
 ///
 /// # Example

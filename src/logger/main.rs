@@ -15,12 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-#![feature(convert)]
-#![feature(file_path)]
-#![feature(plugin)]
-
-#![plugin(regex_macros)]
-
 extern crate docopt;
 extern crate rustc_serialize;
 #[macro_use] extern crate log;
@@ -30,7 +24,6 @@ extern crate rustc_serialize;
 
 
 extern crate env_logger;
-extern crate chrono;
 
 extern crate orion;
 
@@ -44,8 +37,6 @@ use std::io;
 use std::io::Write;
 use std::fs::OpenOptions;
 use std::str::FromStr;
-
-use chrono::{UTC,DateTime,Datelike};
 
 
 mod validator;
@@ -118,14 +109,14 @@ fn main() {
         }
     }
 
-    let meas_list = match MeasurementsList::from_str(args.arg_value.as_str() ) {
+    let meas_list = match MeasurementsList::from_str(&args.arg_value ) {
         Ok(x)   => x,
         Err(_)  => { print!("{}", INVALID_VALUE);
                     return
                    }
     };
 
-    let device = match Device::with_slug(args.arg_device.as_str()) {
+    let device = match Device::with_slug(&args.arg_device) {
         Some(x) => x,
         None  => { 
                     print!("{}", INVALID_DEVICE); 
@@ -135,11 +126,9 @@ fn main() {
 
     let data = MeasurementPoint { 
         date : if args.flag_now { 
-                    UTC::now() 
+                    "now".to_string()
                } else { 
-                    DateTime::parse_from_rfc3339(
-                        args.flag_timestamp.as_str()
-                    ).unwrap().with_timezone(&UTC)
+                        args.flag_timestamp
               }, 
         data: meas_list,
         device: device,
@@ -166,7 +155,7 @@ fn init_logger_with_args( args: &Args ) {
 
 #[derive(Debug)]
 struct MeasurementPoint {
-    date: DateTime<UTC>,
+    date: String,
     data: MeasurementsList,
     device: Device,
 }
@@ -204,10 +193,7 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
     let path = Path::new(DATA_PATH)
                    .join(mp.device.get_driver())
                    .join(mp.device.get_node())
-                   .join(mp.device.get_port())
-                   .join(format!("{}", mp.date.year()))
-                   .join(format!("{}", mp.date.month()))
-                   .join(format!("{}", mp.date.day()));
+                   .join(mp.device.get_port());
 
     debug!("Create all parent directory of {:?}", path.as_path()); 
     try!(fs::create_dir_all(path.as_path()));
@@ -215,7 +201,7 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
     let filename = "data.txt";
     let file_path = path.join(filename);
 
-    debug!("Open or create file {:?}", file_path.as_path());
+    debug!("Open or create file {:?}", file_path);
 
     OpenOptions::new()
                 .create(true)
@@ -231,10 +217,10 @@ fn create_line_for(mp: &MeasurementPoint) -> String {
 
     debug!("Create_line_for {:?}", mp);
 
-    line.push_str(mp.date.to_rfc3339().as_str());
+    line.push_str(&mp.date);
     line.push(' ');
 
-    line.push_str(mp.data.to_string().as_str());
+    line.push_str(&mp.data.to_string());
     line.push('\n');
 
     debug!("Line: {}", line);
@@ -248,7 +234,7 @@ fn add_value(mp: MeasurementPoint) -> io::Result<()> {
     let mut file = try!( open_file_for(&mp) );
     let line = create_line_for(&mp);
 
-    debug!("Append line '{}' to {:?}", line, file.path());
+    debug!("Append line '{}' to file", line);
     try!(file.write_all(line.as_bytes()));
     Ok(())
 }

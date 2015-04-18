@@ -17,8 +17,6 @@
 
 use regex;
 
-use chrono::DateTime;
-
 pub trait OrionLoggerValidator {
 
     fn is_RFC3339_timestamp(&self) -> bool;
@@ -27,10 +25,7 @@ pub trait OrionLoggerValidator {
 impl OrionLoggerValidator for String {
 
     fn is_RFC3339_timestamp(&self) -> bool {
-        match DateTime::parse_from_rfc3339(self.as_str()) {
-            Ok(_) => true,
-            Err(_) => false,
-        }
+        true
     }
 
 

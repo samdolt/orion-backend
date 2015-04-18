@@ -25,6 +25,11 @@ use std::str::FromStr;
 use super::ParseUnitError;
 use std::num::ParseFloatError;
 
+use regex;
+
+macro_rules! regex(
+    ($s:expr) => (regex::Regex::new($s).unwrap());
+);
 /// Internal representation of measurement
 ///
 /// # Example
