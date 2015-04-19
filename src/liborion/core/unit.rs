@@ -19,11 +19,6 @@ use std::str::FromStr;
 use std::error::Error;
 use std::fmt;
 
-use regex;
-macro_rules! regex(
-    ($s:expr) => (regex::Regex::new($s).unwrap());
-);
-
 /// Internal representation of unit (SI)
 ///
 /// # Example

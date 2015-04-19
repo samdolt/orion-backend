@@ -15,12 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-use regex;
-
-macro_rules! regex(
-    ($s:expr) => (regex::Regex::new($s).unwrap());
-);
-
 /// Internal representation of a device
 ///
 /// # Example
@@ -139,7 +133,7 @@ impl Device {
     fn is_valid(&self) -> bool {
         let re = regex!(r"^[\w-]*@[\w-]*.[\w-]*$");
 
-        if re.is_match(&self.slug) == false {
+        if re.is_match(self.slug.as_str()) == false {
             debug!("is_valid failed on {:?}", self);
             return false;
         }
@@ -148,19 +142,19 @@ impl Device {
     }
 
     pub fn get_slug<'a>(&'a self) -> &'a str {
-        return &self.slug
+        return self.slug.as_str()
     }
 
     pub fn get_port<'a>(&'a self) -> &'a str {
-        return &self.port
+        return self.port.as_str()
     }
 
     pub fn get_node<'a>(&'a self) -> &'a str {
-        return &self.node
+        return self.node.as_str()
     }
 
     pub fn get_driver<'a>(&'a self) -> &'a str {
-        return &self.driver
+        return self.driver.as_str()
     }
 }
 
