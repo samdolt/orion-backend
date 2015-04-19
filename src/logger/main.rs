@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-#![feature(convert)]
-#![feature(file_path)]
 #![feature(plugin)]
 
 #![plugin(regex_macros)]
@@ -112,20 +110,20 @@ fn main() {
     if args.flag_timestamp != "" {
         trace!("Testing args.flag_timestamp");
 
-        if args.flag_timestamp.is_RFC3339_timestamp() == false {
+        if args.flag_timestamp.is_rfc3339_timestamp() == false {
             println!("{}", INVALID_TIMESTAMP);
             return;
         }
     }
 
-    let meas_list = match MeasurementsList::from_str(args.arg_value.as_str() ) {
+    let meas_list = match MeasurementsList::from_str( &args.arg_value ) {
         Ok(x)   => x,
         Err(_)  => { print!("{}", INVALID_VALUE);
                     return
                    }
     };
 
-    let device = match Device::with_slug(args.arg_device.as_str()) {
+    let device = match Device::with_slug( &args.arg_device ) {
         Some(x) => x,
         None  => { 
                     print!("{}", INVALID_DEVICE); 
@@ -138,7 +136,7 @@ fn main() {
                     UTC::now() 
                } else { 
                     DateTime::parse_from_rfc3339(
-                        args.flag_timestamp.as_str()
+                        &args.flag_timestamp
                     ).unwrap().with_timezone(&UTC)
               }, 
         data: meas_list,
@@ -222,8 +220,6 @@ fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
                 .write(true)
                 .append(true)
                 .open(file_path)
-
-
 }
 
 fn create_line_for(mp: &MeasurementPoint) -> String {
@@ -231,10 +227,10 @@ fn create_line_for(mp: &MeasurementPoint) -> String {
 
     debug!("Create_line_for {:?}", mp);
 
-    line.push_str(mp.date.to_rfc3339().as_str());
+    line.push_str( &mp.date.to_rfc3339() );
     line.push(' ');
 
-    line.push_str(mp.data.to_string().as_str());
+    line.push_str( &mp.data.to_string() );
     line.push('\n');
 
     debug!("Line: {}", line);
@@ -246,9 +242,10 @@ fn create_line_for(mp: &MeasurementPoint) -> String {
 
 fn add_value(mp: MeasurementPoint) -> io::Result<()> {
     let mut file = try!( open_file_for(&mp) );
+
     let line = create_line_for(&mp);
 
-    debug!("Append line '{}' to {:?}", line, file.path());
+    debug!("Append line '{}' to file", line);
     try!(file.write_all(line.as_bytes()));
     Ok(())
 }

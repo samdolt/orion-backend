@@ -133,7 +133,7 @@ impl Device {
     fn is_valid(&self) -> bool {
         let re = regex!(r"^[\w-]*@[\w-]*.[\w-]*$");
 
-        if re.is_match(self.slug.as_str()) == false {
+        if re.is_match( &self.slug ) == false {
             debug!("is_valid failed on {:?}", self);
             return false;
         }
@@ -142,19 +142,19 @@ impl Device {
     }
 
     pub fn get_slug<'a>(&'a self) -> &'a str {
-        return self.slug.as_str()
+        return &self.slug
     }
 
     pub fn get_port<'a>(&'a self) -> &'a str {
-        return self.port.as_str()
+        return &self.port
     }
 
     pub fn get_node<'a>(&'a self) -> &'a str {
-        return self.node.as_str()
+        return &self.node
     }
 
     pub fn get_driver<'a>(&'a self) -> &'a str {
-        return self.driver.as_str()
+        return &self.driver
     }
 }
 

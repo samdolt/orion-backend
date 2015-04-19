@@ -15,19 +15,18 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-use regex;
 
 use chrono::DateTime;
 
 pub trait OrionLoggerValidator {
 
-    fn is_RFC3339_timestamp(&self) -> bool;
+    fn is_rfc3339_timestamp(&self) -> bool;
 }
 
 impl OrionLoggerValidator for String {
 
-    fn is_RFC3339_timestamp(&self) -> bool {
-        match DateTime::parse_from_rfc3339(self.as_str()) {
+    fn is_rfc3339_timestamp(&self) -> bool {
+        match DateTime::parse_from_rfc3339(&self) {
             Ok(_) => true,
             Err(_) => false,
         }
