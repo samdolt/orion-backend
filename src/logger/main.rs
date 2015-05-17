@@ -31,35 +31,21 @@ extern crate chrono;
 extern crate orion;
 
 use docopt::Docopt;
-use std::fs;
 
-use std::fs::File;
-
-use std::path::Path;
-use std::io;
-use std::io::Write;
-use std::fs::OpenOptions;
-use std::str::FromStr;
-
-use chrono::{UTC,DateTime,Datelike};
-
-
-mod validator;
-use validator::OrionLoggerValidator;
-
-mod messages;
+pub mod validator;
+pub mod messages;
 use messages::*;
+pub mod add;
 
-use orion::core::*;
-
-static DATA_PATH: &'static str = "/tmp/data";
+pub static DATA_PATH: &'static str = "/tmp/data";
 
 static USAGE: &'static str = "
 Orion Backend
 
 Usage:
-    orion-logger [-v --debug] --now from <device> add <value>
-    orion-logger [-v --debug] --timestamp=<timestamp> from <device> add <value>
+    orion-logger [-v --debug] add <value> --now from <device>
+    orion-logger [-v --debug] add <value> --timestamp=<timestamp> from <device>
+    orion-logger server [-v --debug] (start | stop)
     orion-logger -h | --help
     orion-logger --version
 
@@ -70,7 +56,12 @@ Options:
     -h, --help                Show help.
     --version                 Show version.
     --debug                   Very verbose output.
-    
+
+Commands:
+    add                       Log a new set of data
+    server                    Manage orion-logger server
+
+See 'orion-logger help <command>' for more information on a specific command.
 
 Notes:
     Combining --debug and --verbose enable `trace` level message
@@ -79,70 +70,41 @@ Report bugs to: <samuel@dolt.ch>
 Orion home page: <http://orion.dolt.ch>
 ";
 
-#[derive(RustcDecodable, Debug)]
-struct Args {
-    arg_device: String,
-    arg_value: String,
-    flag_timestamp: String,
-    flag_now: bool,
-    flag_verbose: bool,
-    flag_help: bool,
-    flag_version: bool,
-    flag_debug: bool,
+fn main() {
+    let args : Args = Docopt::new(USAGE)
+                            .and_then(|d|  d.decode())
+                            .unwrap_or_else(|e| e.exit() );
+    init_logger_with_args(&args);
+    get_command(&args).run( args );
 }
 
-fn main() {
-    let args: Args = Docopt::new(USAGE)
-                            .and_then(|d| d.decode())
-                            .unwrap_or_else(|e| e.exit());
 
-    if args.flag_version {
-        println!("Orion-Logger (Orion-Backend) {}", env!("CARGO_PKG_VERSION"));
-        println!("{}", COPYRIGHT);
-        return;
+#[derive(Debug, RustcDecodable, Copy, Clone)]
+enum Command {
+    Add,
+    Server,
+    Default,
+}
 
-    }
-
-    init_logger_with_args(&args);
-
-    if args.flag_timestamp != "" {
-        trace!("Testing args.flag_timestamp");
-
-        if args.flag_timestamp.is_rfc3339_timestamp() == false {
-            println!("{}", INVALID_TIMESTAMP);
-            return;
+impl Command {
+    fn run ( &self, args: Args ) {
+        match *self {
+            Command::Add => add::run( args ),
+            Command::Server => unimplemented!(),
+            Command::Default => default_cmd_run( args ),
         }
     }
+}
 
-    let meas_list = match MeasurementsList::from_str( &args.arg_value ) {
-        Ok(x)   => x,
-        Err(_)  => { print!("{}", INVALID_VALUE);
-                    return
-                   }
-    };
+fn get_command(args: &Args) -> Command {
 
-    let device = match Device::with_slug( &args.arg_device ) {
-        Some(x) => x,
-        None  => { 
-                    print!("{}", INVALID_DEVICE); 
-                    return
-        },
-    };
-
-    let data = MeasurementPoint { 
-        date : if args.flag_now { 
-                    UTC::now() 
-               } else { 
-                    DateTime::parse_from_rfc3339(
-                        &args.flag_timestamp
-                    ).unwrap().with_timezone(&UTC)
-              }, 
-        data: meas_list,
-        device: device,
-    };
-
-    add_value(data).unwrap();
-
+    if args.cmd_add {
+        Command::Add
+    } else if args.cmd_server {
+        Command::Server
+    } else {
+        Command::Default
+    }
 }
 
 fn init_logger_with_args( args: &Args ) {
@@ -160,90 +122,26 @@ fn init_logger_with_args( args: &Args ) {
     env_logger::init().unwrap();
 }
 
-#[derive(Debug)]
-struct MeasurementPoint {
-    date: DateTime<UTC>,
-    data: MeasurementsList,
-    device: Device,
+fn default_cmd_run(args: Args) {
+
+    if args.flag_version {
+        println!("Orion-Logger (Orion-Backend) {}", env!("CARGO_PKG_VERSION"));
+        println!("{}", COPYRIGHT);
+        return;
+
+    }
 }
 
-/// Return a `io::Result<File>` for the given `MeasurementPoint`
-///
-/// # Examples
-///
-/// ```
-/// let mp = MeasurementPoint {
-///     date : UTC::now(),
-///     data : "Some data",
-///     device : Device::with_slug("port@node.driver"),
-/// }
-///
-/// let file = open_file_for(&mp).unwrap();
-/// ```
-///
-/// This examples open this file:
-///
-///     $(DATA_PATH)/$(DRIVER)/$(NODE)/$(YEAR)/$(MONTH)/$DAY/$(PORT).dat
-///
-/// This function create every missing parent directory and open the file
-/// whith `create`, `write` and `append` flags
-///
-/// See [`OpenOptions` from `std::fs`](http://doc.rust-lang.org/std/fs/struct.OpenOptions.html)
-///
-/// # Failures
-///
-/// This function can fail if:
-///     - Invalid permission is set on folder $(DATA_PATH)
-///     - $(DATA_PATH) is read only
-///     - Other system error with file handling
-fn open_file_for(mp: &MeasurementPoint) -> io::Result<File> {
-    let path = Path::new(DATA_PATH)
-                   .join(mp.device.get_driver())
-                   .join(mp.device.get_node())
-                   .join(mp.device.get_port())
-                   .join(format!("{}", mp.date.year()))
-                   .join(format!("{}", mp.date.month()))
-                   .join(format!("{}", mp.date.day()));
-
-    debug!("Create all parent directory of {:?}", path.as_path()); 
-    try!(fs::create_dir_all(path.as_path()));
-
-    let filename = "data.txt";
-    let file_path = path.join(filename);
-
-    debug!("Open or create file {:?}", file_path.as_path());
-
-    OpenOptions::new()
-                .create(true)
-                .write(true)
-                .append(true)
-                .open(file_path)
-}
-
-fn create_line_for(mp: &MeasurementPoint) -> String {
-    let mut line = String::with_capacity(80);
-
-    debug!("Create_line_for {:?}", mp);
-
-    line.push_str( &mp.date.to_rfc3339() );
-    line.push(' ');
-
-    line.push_str( &mp.data.to_string() );
-    line.push('\n');
-
-    debug!("Line: {}", line);
-
-    line
-}
-
-
-
-fn add_value(mp: MeasurementPoint) -> io::Result<()> {
-    let mut file = try!( open_file_for(&mp) );
-
-    let line = create_line_for(&mp);
-
-    debug!("Append line '{}' to file", line);
-    try!(file.write_all(line.as_bytes()));
-    Ok(())
+#[derive(RustcDecodable, Debug)]
+pub struct Args {
+    cmd_server: bool,
+    cmd_add: bool,
+    arg_device: String,
+    arg_value: String,
+    flag_timestamp: String,
+    flag_now: bool,
+    flag_verbose: bool,
+    flag_help: bool,
+    flag_version: bool,
+    flag_debug: bool,
 }
