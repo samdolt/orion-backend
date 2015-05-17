@@ -24,6 +24,7 @@ use std::str::FromStr;
 
 use super::ParseUnitError;
 use std::num::ParseFloatError;
+use regex;
 
 /// Internal representation of measurement
 ///
@@ -120,8 +121,13 @@ impl FromStr for Measurement {
         };
         trace!("Measurement.from_str : Unit => {}", extracted_unit);
 
+        // Rust 1.0 Workaround
+        // let value = try!( f32::from_str(extracted_value) );
+        let value = match f32::from_str(extracted_value) {
+            Ok(v) => v,
+            Err(_) => return Err(ParseMeasurementError::InvalidValue),
+        };
 
-        let value = try!( f32::from_str(extracted_value) );
         let unit = try!( Unit::from_str(extracted_unit) );
 
         Ok (
@@ -159,7 +165,7 @@ impl fmt::Display for Measurement {
 
 #[derive(Debug)]
 pub enum ParseMeasurementError {
-    InvalidValue(ParseFloatError),
+    InvalidValue, // (ParseFloatError)
     InvalidUnit(ParseUnitError),
     InvalidFormat,
 }
@@ -173,7 +179,7 @@ impl fmt::Display for ParseMeasurementError {
 impl Error for ParseMeasurementError {
     fn description(&self) -> &str {
         match *self {
-            ParseMeasurementError::InvalidValue(_)  => "Invalid value",
+            ParseMeasurementError::InvalidValue  => "Invalid value",
             ParseMeasurementError::InvalidUnit(_)   => "Invalid unit",
             ParseMeasurementError::InvalidFormat => "Invalid format",
         }
@@ -181,7 +187,8 @@ impl Error for ParseMeasurementError {
 
     fn cause(&self) -> Option<&Error> {
         match *self {
-            ParseMeasurementError::InvalidValue(ref err) => Some(err as &Error),
+            //ParseMeasurementError::InvalidValue(ref err) => Some(err as &Error),
+            ParseMeasurementError::InvalidValue          => None,
             ParseMeasurementError::InvalidUnit(ref err)  => Some(err as &Error),
             ParseMeasurementError::InvalidFormat         => None,
         }
@@ -194,11 +201,11 @@ impl From<ParseUnitError> for ParseMeasurementError {
     }
 }
 
-impl From<ParseFloatError> for ParseMeasurementError {
+/*impl From<ParseFloatError> for ParseMeasurementError {
     fn from(err: ParseFloatError) -> ParseMeasurementError {
         ParseMeasurementError::InvalidValue(err)
     }
-}
+}*/
 
 
 #[test]

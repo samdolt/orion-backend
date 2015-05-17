@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-#![feature(plugin)]
-#![plugin(regex_macros)]
-
 extern crate regex;
 #[macro_use] extern crate log;
+#[macro_use] extern crate patch;
 
 
 pub mod core;
+

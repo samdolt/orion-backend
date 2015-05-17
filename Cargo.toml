@@ -12,11 +12,13 @@ name = "orion"
 path = "src/liborion/lib.rs"
 
 [dependencies]
-dbus = "*"
 docopt = "*"
 rustc-serialize = "*"
 env_logger = "*"
 log = "*"
 chrono = "*"
 regex = "*"
-regex_macros = "*"
+
+[dependencies.patch]
+path = "src/libpatch"
+version = "*"

@@ -23,6 +23,7 @@ use std::convert::From;
 use std::str::FromStr;
 
 use super::ParseMeasurementError;
+use regex;
 
 /// Internal representation of measurement list
 ///

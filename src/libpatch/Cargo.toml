@@ -1,0 +1,10 @@
+[package]
+name = "patch"
+version = "0.0.1"
+authors = ["Samuel Dolt"]
+
+[lib]
+name = "patch"
+
+[dependencies]
+regex = "*"

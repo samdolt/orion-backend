@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
+use regex;
+
 /// Internal representation of a device
 ///
 /// # Example

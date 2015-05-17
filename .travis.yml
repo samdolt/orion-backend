@@ -1,5 +1,7 @@
 sudo: required
 language: rust
+rust:
+    - stable
 env:
   global:
     - LD_LIBRARY_PATH: /usr/local/lib

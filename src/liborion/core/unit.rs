@@ -18,6 +18,7 @@
 use std::str::FromStr;
 use std::error::Error;
 use std::fmt;
+use regex;
 
 /// Internal representation of unit (SI)
 ///
