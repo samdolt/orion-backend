@@ -18,6 +18,7 @@ env_logger = "*"
 log = "*"
 chrono = "*"
 regex = "*"
+nanomsg = "*"
 
 [dependencies.patch]
 path = "src/libpatch"

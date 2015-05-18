@@ -18,6 +18,7 @@
 
 extern crate docopt;
 extern crate rustc_serialize;
+extern crate nanomsg;
 #[macro_use] extern crate log;
 #[macro_use] extern crate patch;
 
@@ -35,7 +36,9 @@ use docopt::Docopt;
 pub mod validator;
 pub mod messages;
 use messages::*;
+
 pub mod add;
+pub mod server;
 
 pub static DATA_PATH: &'static str = "/tmp/data";
 
@@ -45,7 +48,7 @@ Orion Backend
 Usage:
     orion-logger [-v --debug] add <value> --now from <device>
     orion-logger [-v --debug] add <value> --timestamp=<timestamp> from <device>
-    orion-logger server [-v --debug] (start | stop)
+    orion-logger [-v --debug] server (start | stop)
     orion-logger -h | --help
     orion-logger --version
 
@@ -90,7 +93,7 @@ impl Command {
     fn run ( &self, args: Args ) {
         match *self {
             Command::Add => add::run( args ),
-            Command::Server => unimplemented!(),
+            Command::Server => server::run( args ),
             Command::Default => default_cmd_run( args ),
         }
     }
@@ -136,6 +139,8 @@ fn default_cmd_run(args: Args) {
 pub struct Args {
     cmd_server: bool,
     cmd_add: bool,
+    cmd_start: bool,
+    cmd_stop: bool,
     arg_device: String,
     arg_value: String,
     flag_timestamp: String,

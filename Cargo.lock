@@ -6,6 +6,7 @@ dependencies = [
  "docopt 0.6.64 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nanomsg 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "patch 0.0.1",
  "regex 0.1.30 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -52,6 +53,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "log"
 version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "nanomsg"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nanomsg-sys 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "nanomsg-sys"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
