@@ -109,7 +109,7 @@ pub fn start() {
 pub fn stop() {
 
     fn stop_failed() -> ! {
-        writeln!(&mut ::std::io::stderr(), "Error..");
+        writeln!(&mut ::std::io::stderr(), "Error..").unwrap();
         ::std::process::exit(1);
     }
 

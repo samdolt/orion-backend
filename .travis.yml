@@ -2,6 +2,9 @@ sudo: required
 language: rust
 rust:
     - stable
+
+install:
+    - bash ./scripts/travis-install-nanomsg.sh
 env:
   global:
     - LD_LIBRARY_PATH: /usr/local/lib
