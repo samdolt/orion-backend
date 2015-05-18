@@ -15,14 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with orion_backend.  If not, see <http://www.gnu.org/licenses/>.
 
-extern crate regex;
-extern crate nanomsg;
+mod channel;
 
-#[macro_use] extern crate log;
-#[macro_use] extern crate patch;
-
-
-
-pub mod core;
-pub mod logger;
+pub use self::channel::Channel;
 

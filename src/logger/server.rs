@@ -19,6 +19,7 @@ use super::Args;
 use super::DATA_PATH;
 
 use orion::core::*;
+use orion::logger::Channel;
 
 use nanomsg::{Socket, Protocol};
 use std::thread;
@@ -37,8 +38,8 @@ pub fn run ( args: Args ) {
     }
 }
 
-const CLIENT_DEVICE_URL: &'static str = "ipc:///tmp/reqrep_example_front.ipc";
-const SERVER_DEVICE_URL: &'static str = "ipc:///tmp/reqrep_example_back.ipc";
+const CLIENT_DEVICE_URL: &'static str = "ipc:///tmp/orion_logger_front.ipc";
+const SERVER_DEVICE_URL: &'static str = "ipc:///tmp/orion_logger_back.ipc";
 
 pub fn start() {
     trace!("Logger server task 'start'");
@@ -106,32 +107,17 @@ pub fn start() {
 }
 
 pub fn stop() {
-    let mut socket = Socket::new(Protocol::Req).unwrap();
-    let mut endpoint = socket.connect(CLIENT_DEVICE_URL).unwrap();
 
-    let mut reply = String::new();
-
-    let request = "LOGGER/1.0 STOP".to_string();
-
-    match socket.write_all(request.as_bytes()) {
-        Ok(..) => println!("Send '{}'.", request),
-        Err(err) => {
-            println!("Client failed to send request '{}'.", err);
-            return
-        }
+    fn stop_failed() -> ! {
+        writeln!(&mut ::std::io::stderr(), "Error..");
+        ::std::process::exit(1);
     }
 
-    match socket.read_to_string(&mut reply) {
-        Ok(_) => {
-            println!("Recv '{}'.", reply);
-            reply.clear()
-        },
-        Err(err) => {
-            println!("Client failed to receive reply '{}'.", err);
-            return
-        }
-    }
-    endpoint.shutdown();
+    let mut channel = Channel::new().unwrap_or_else( |e| stop_failed() );
+    let reply = channel.request("LOGGER/1.0 STOP".to_string() )
+                       .unwrap_or_else(|e| stop_failed() );
+
+    println!("Recv '{}'.", reply);
 }
 
 pub fn client() {
